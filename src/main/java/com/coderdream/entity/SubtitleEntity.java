@@ -1,12 +1,17 @@
 package com.coderdream.entity;
 
 import java.io.Serializable;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author CoderDream
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class SubtitleEntity implements Serializable {
 
     /**

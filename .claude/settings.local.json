@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn compile:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(mvn dependency:tree:*)",
+      "Bash(findstr:*)",
+      "Bash(dir /s /b \"%USERPROFILE%\\\\.m2\\\\repository\\\\dev\\\\langchain4j\")",
+      "Bash(mvn dependency:get:*)",
+      "Bash(mvn dependency:purge-local-repository:*)",
+      "WebSearch",
+      "Bash(test:*)",
+      "Bash(where:*)",
+      "Bash(\"C:\\\\Program Files\\\\Python39\\\\python.exe\" -m pip list)",
+      "Bash(\"C:\\\\Program Files\\\\Python39\\\\python.exe\" --version)"
+    ]
+  }
+}

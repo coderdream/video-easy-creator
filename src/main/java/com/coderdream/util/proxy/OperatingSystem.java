@@ -275,6 +275,35 @@ public class OperatingSystem {
     return python;
   }
 
+  /**
+   * 获取 Python 3.9 路径（用于 aeneas 模块）
+   * 因为 aeneas 模块需要 Python 3.9 版本
+   * @return Python 3.9 完整路径（Windows 下自动添加引号处理空格）
+   */
+  public static String getPython39Env() {
+    String osType = OperatingSystem.getOS();
+    System.out.println("操作系统类型: " + osType);
+
+    String python39;
+    // 根据操作系统返回对应的 Python 3.9 路径
+    switch (osType) {
+      case OS_WINDOWS -> {
+        python39 = com.coderdream.util.cd.CdConstants.PYTHON39_PATH_WINDOWS;
+        // 如果路径包含空格，则用引号包裹（Windows 命令行需要）
+        if (python39.contains(" ")) {
+          python39 = "\"" + python39 + "\"";
+        }
+      }
+      case OS_MAC -> python39 = com.coderdream.util.cd.CdConstants.PYTHON39_PATH_MAC;
+      case OS_LINUX -> python39 = com.coderdream.util.cd.CdConstants.PYTHON39_PATH_LINUX;
+      default -> {
+        System.out.println("无法识别的操作系统，使用默认 python3.9");
+        python39 = "python3.9";
+      }
+    }
+    return python39;
+  }
+
 
   public static void main(String[] args) {
     String osType = OperatingSystem.getOS();

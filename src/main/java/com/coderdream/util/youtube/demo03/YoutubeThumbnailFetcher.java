@@ -1,5 +1,6 @@
 package com.coderdream.util.youtube.demo03;
 
+import cn.hutool.core.util.StrUtil;
 import com.coderdream.util.cd.CdConstants;
 import com.coderdream.util.youtube.YouTubeApiUtil;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -8,6 +9,7 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.ThumbnailDetails;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,7 +19,6 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class YoutubeThumbnailFetcher {
@@ -29,6 +30,12 @@ public class YoutubeThumbnailFetcher {
 //  private static final String IMAGE_FORMAT = "jpg"; // 图片格式
 
   public static String getYoutubeThumbnailUrl(String videoId) {
+    // 【关键修改】在调用API前检查API_KEY是否存在
+    if (StrUtil.isBlank(API_KEY)) {
+      log.error("YouTube API 密钥 (API_KEY) 未配置或为空，请在 CdConstants.YOUTUBE_API_KEY 中进行配置。");
+      return null;
+    }
+
     try {
       NetHttpTransport transport = new NetHttpTransport();
       JacksonFactory jsonFactory = new JacksonFactory();

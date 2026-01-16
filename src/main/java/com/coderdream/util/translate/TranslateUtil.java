@@ -570,7 +570,11 @@ public class TranslateUtil {
                 // 3. 【内容校验】检查是否有未翻译的行
                 List<String> untranslatedLinesInChunk = new ArrayList<>();
                 for (String translatedLine : translatedChunkLines) {
-                    if (containsEnglishLetters(translatedLine) && !ChineseCharacterUtil.containsChinese(translatedLine)) {
+                    // 【新增】如果是URL，则不视为未翻译
+                    if (isUrl(translatedLine)) {
+                        continue;
+                    }
+                    if (containsEnglishLetters(translatedLine) && !ChineseCharacterUtil.containsChinese(translatedLine) && !StrUtil.isNumeric(translatedLine.replaceAll("[.:]", ""))) {
                         untranslatedLinesInChunk.add(translatedLine);
                     }
                 }
@@ -640,6 +644,20 @@ public class TranslateUtil {
         }
         // 使用正则表达式匹配任何英文字母（不区分大小写）
         return text.matches(".*[a-zA-Z].*");
+    }
+
+    /**
+     * 辅助方法：检查字符串是否为URL。
+     *
+     * @param text 要检查的字符串
+     * @return 如果是URL则返回 true
+     */
+    private static boolean isUrl(String text) {
+        if (text == null) {
+            return false;
+        }
+        String trimmedText = text.trim().toLowerCase();
+        return trimmedText.startsWith("www.") || trimmedText.startsWith("http://") || trimmedText.startsWith("https://");
     }
 
     public static void translateEngSrc(String folderName, String fileName) {

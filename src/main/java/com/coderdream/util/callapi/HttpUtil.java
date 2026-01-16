@@ -569,6 +569,37 @@ public class HttpUtil {
   }
 
   /**
+   * Hutool的HttpGet请求方法，确保请求的响应被正确关闭并捕获异常。
+   *
+   * @param url       请求地址
+   * @param map       请求头
+   * @param proxyHost 代理服务器地址
+   * @param proxyPort 代理服务器端口
+   * @return 返回响应体
+   */
+  public static String httpHutoolGet(String url, Map<String, String> map, String proxyHost, int proxyPort) {
+    // 使用 try-with-resources 确保 HttpResponse 被自动关闭
+    try (HttpResponse response = HttpRequest.get(url)
+      .addHeaders(map)
+      .setHttpProxy(proxyHost, proxyPort)
+      .execute()) {
+
+      // 获取响应体
+      String responseBody = response.body();
+
+      // 打印日志，避免直接输出敏感数据
+      log.info("httpGet请求地址: {} 返回结果: {}", url, responseBody);
+
+      return responseBody;
+    } catch (Exception e) {
+      // 捕获请求中的异常并记录日志
+      log.error("HTTP GET 请求失败，URL: {}，错误信息: {}", url, e.getMessage(),
+        e);
+      return null;  // 或者根据业务需求返回默认值
+    }
+  }
+
+  /**
    * hutool的httputilPUT请求方法
    *
    * @param jsons

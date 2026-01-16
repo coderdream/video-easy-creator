@@ -188,11 +188,11 @@ public class CdConstants {
   public static final String BACKGROUND_IMAGE_FILENAME = "background.png"; // 背景图片
   public static final String PIC_FOLDER = "pic"; // 输出目录
 
-  public static final String YOUTUBE_API_KEY = System.getenv("GOOGLE_API_KEY");
+  public static final String YOUTUBE_API_KEY = System.getenv("YOUTUBE_API_KEY");
 
 //  public static final String YOUTUBE_API_KEY = System.getenv("GOOGLE_API_KEY");
 
-  public static final String GEMINI_API_KEY = "AIzaSyCZ2zF0ZBenMe1qvqGm3l-c8_CbZfUgNEY";// "AIzaSyDa9cjNDFkncGM2fugOuWsLPO-1HfNqvhU";// "AIzaSyAMgO2OC1QWN0J7JaYQbOgf53FzmKhh5oQ";//"AIzaSyCFPln86K2C8MZUGPksB1V0EW_1QJA-dDU";// System.getenv("GEMINI_API_KEY");
+  public static final String GEMINI_API_KEY = "AIzaSyAIrJl7ngroAysbkhFPdsZNi3b3YBReIBI";// System.getenv("GEMINI_API_KEY");
   public static final String GROK_API_KEY = "xai-5KRGYNaegWzP3x1C4nxlHvV21WCmCufOYXnaz8FIZAi2k599bkwAQFc5Idq7IF0LKQjQ8c5mEyh9SXki";//System.getenv("GROK_API_KEY");
 
   // proxy-host 127.0.0.1
@@ -291,5 +291,14 @@ public class CdConstants {
   public static final String SUBTITLE_EN_ZH_CN = "en-zh-CN";
   public static final String SUBTITLE_EN_ZH_TW = "en-zh-TW";
 
+  /**
+   * Python 3.9 路径配置（用于 aeneas 模块）
+   * Windows: C:\\Program Files\\Python39\\python.exe
+   * Mac: /usr/local/bin/python3.9
+   * Linux: /usr/bin/python3.9
+   */
+  public static final String PYTHON39_PATH_WINDOWS = "C:\\Program Files\\Python39\\python.exe";
+  public static final String PYTHON39_PATH_MAC = "/usr/local/bin/python3.9";
+  public static final String PYTHON39_PATH_LINUX = "/usr/bin/python3.9";
 
 }

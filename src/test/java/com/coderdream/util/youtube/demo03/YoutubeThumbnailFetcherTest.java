@@ -15,7 +15,7 @@ class YoutubeThumbnailFetcherTest {
 
   @Test
   void getThumbnail() {
-    String videoUrl = "https://www.youtube.com/watch?v=RNgOLNy9low";
+    String videoUrl = "https://www.youtube.com/watch?v=PewKBfWP_uw";
     String thumbnailPath =
       OperatingSystem.getBaseFolder() + File.separator
         + CdConstants.COVER_FOLDER + File.separator;

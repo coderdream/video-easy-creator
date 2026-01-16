@@ -379,7 +379,8 @@ public class SubtitleUtil {
    */
   public static void genSrtByExecuteCommand(String audioFileName,
     String subtitleFileName, String srtFileName, String lang) {
-    String python = OperatingSystem.getPythonEnv();
+    // 使用 Python 3.9 以支持 aeneas 模块
+    String python = OperatingSystem.getPython39Env();
     String command = python +
       " -m aeneas.tools.execute_task " + audioFileName + " "
       + subtitleFileName

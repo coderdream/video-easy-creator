@@ -8,8 +8,7 @@ import com.coderdream.util.CommonUtil;
 import com.coderdream.util.cd.CdConstants;
 import com.coderdream.util.cd.CdFileUtil;
 import com.coderdream.util.cmd.CommandUtil;
-import com.coderdream.util.gemini.GeminiApiClient;
-import com.coderdream.util.gemini.GeminiApiUtil;
+import com.coderdream.util.gemini.*;
 import com.coderdream.util.proxy.OperatingSystem;
 import com.coderdream.util.resource.ResourcesSourcePathUtil;
 import com.coderdream.util.subtitle.SubtitleUtil;
@@ -22,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -690,5 +690,168 @@ public class PreparePublishUtil {
 //        folderPath + File.separator + "cover" + File.separator + folderName  + "_720p.png";
 //      FileUtil.copy(coverFileName, distFolderName, true);
         }
+    }
+
+    /**
+     * 生成 B站 使用的 publish.txt 文件
+     *
+     * @param folderName 文件夹名称
+     */
+    public static void genPublishCommon(String folderName) {
+        String folderPath = CommonUtil.getFullPath(folderName);
+        String publishFileName = folderPath + File.separator + "publish.txt";
+
+        // 【第一部分】：固定内容 + 动态问题
+        StringBuilder part1 = new StringBuilder();
+        part1.append("●宝子们，求个三连[保卫萝卜_哭哭]\n");
+        part1.append("●本期文本及翻译，音频在视频简介哦[给心心]\n");
+        part1.append("●小店有合集电子档下载，包括【对话音频、英文文本、中文翻译、核心词汇和高级词汇表】哦[打call]\n");
+        part1.append("●本期问题: ");
+
+        String scriptDialogFileName = CommonUtil.getFullPathFileName(folderName, "script_dialog", ".txt");
+        List<String> scriptLines = FileUtil.readLines(scriptDialogFileName, StandardCharsets.UTF_8);
+        String questionLineRaw = "";
+        for (String line : scriptLines) {
+            if (line.contains("a)") && line.contains("b)") && line.contains("c)")) {
+                questionLineRaw = line;
+                break;
+            }
+        }
+
+        // TODO 1
+        String questionFileName = ResourcesSourcePathUtil.getResourcesSourceAbsolutePath()
+            + File.separator + "data" + File.separator + "bbc" + File.separator + "question.txt";
+        Set<String> questionSet = new HashSet<>(FileUtil.readLines(questionFileName, StandardCharsets.UTF_8));
+
+        String questionPart = "";
+        if (StrUtil.isNotBlank(questionLineRaw)) {
+            int questionStartIndex = -1;
+            // TODO 2
+            for (String question : questionSet) {
+                if (questionLineRaw.contains(question)) {
+                    questionStartIndex = questionLineRaw.lastIndexOf(question);
+                    break;
+                }
+            }
+
+            if (questionStartIndex != -1) {
+                String rawQuestionWithOptions = questionLineRaw.substring(questionStartIndex);
+                // 分割问题和选项
+                int optionAIndex = rawQuestionWithOptions.indexOf("a)");
+                String questionText = rawQuestionWithOptions.substring(0, optionAIndex).trim();
+                String optionsText = rawQuestionWithOptions.substring(optionAIndex);
+
+                // 格式化输出，将选项分割成多行
+                questionPart = questionText + "\n" +
+                    optionsText.replace(" b)", "\nb)").replace(" c)", "\nc)");
+                part1.append(questionPart);
+            } else {
+                log.error("没有找到问题所在的行！");
+                return;
+            }
+        }
+
+        // 查找问题时间戳
+        String srtFileName = CommonUtil.getFullPathFileName(folderName, "eng", ".srt");
+        String questionTimestamp = "00:00"; // 默认值
+        if (FileUtil.exist(srtFileName)) {
+            List<SubtitleEntity> subtitles = CdFileUtil.readSrtFileContent(srtFileName);
+            for (SubtitleEntity subtitle : subtitles) {
+                if (subtitle.getSubtitle().contains("a)")) {
+                    // 提取开始时间戳，并格式化为 mm:ss
+                    String startTime = subtitle.getTimeStr().split(" --> ")[0];
+                    questionTimestamp = startTime.substring(3, 8); // 从 "00:01:44,480" 提取 "01:44"
+                    break;
+                }
+            }
+        }
+
+        // 【第二部分】：翻译问题
+        StringBuilder part2 = new StringBuilder();
+        part2.append("●本期问题时间戳：").append(questionTimestamp).append("\n");
+
+        String translatedQuestion = "";
+        if (StrUtil.isNotBlank(questionPart)) {
+            String prompt = "请将以下英文问题和选项翻译成中文。要求：\n" +
+                "1. 将问题意译为一个自然流畅、通俗易懂的简短中文问题，总长度不超过12个汉字（含标点）。\n" +
+                "2. 将每个选项翻译成不超过6个汉字的中文（不包含选项字母）。\n" +
+                "3. 保持原有的 a) b) c) 格式，但使用中文全角括号，例如 a）b）c）。\n" +
+                "4. 每个选项占一行。\n" +
+                "5. 【重要】问题和第一个选项之间不要有任何空行。\n" +
+                "需要翻译的内容如下：\n" +
+                "\n" +
+                questionPart + "\n" +
+                "";
+            // 增加重试机制
+            int maxRetries = 5;
+            long retryDelayMillis = 3000; // 2秒
+
+            for (int attempt = 1; attempt <= maxRetries; attempt++) {
+                translatedQuestion = GeminiApiClient.generateContent(prompt);
+                if (StrUtil.isNotBlank(translatedQuestion)) {
+                    log.info("Gemini API 翻译成功 (尝试次数: {})", attempt);
+                    break; // 成功，跳出循环
+                }
+
+                log.warn("调用 Gemini API 翻译问题失败 (尝试 {}/{})，返回内容为空。", attempt, maxRetries);
+
+                if (attempt < maxRetries) {
+                    try {
+                        Thread.sleep(retryDelayMillis);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        log.error("重试等待时发生中断异常", e);
+                    }
+                } else {
+                    log.error("调用 Gemini API 翻译问题失败，已达最大重试次数。Prompt: {}", prompt);
+                    throw new RuntimeException("调用 Gemini API 翻译问题失败，已达最大重试次数。");
+                }
+            }
+            part2.append(translatedQuestion);
+        }
+
+        // 【第三部分】：广告信息
+        Map<String, String> adMap = new LinkedHashMap<>();
+        adMap.put("2025年52期全套资料（更新中）\nhttps://b23.tv/KTDB9bQ", "2025");
+        adMap.put("2024年52期全套资料\nhttps://b23.tv/rMZCkcd", "2024");
+        adMap.put("2023年52期全套资料\nhttps://b23.tv/CMl2coN", "2023");
+        adMap.put("2022年52期全套资料\nhttps://b23.tv/EEiF0hK", "2022");
+        adMap.put("2021年52期全套资料\nhttps://b23.tv/VuIgRyj", "2021");
+        adMap.put("2020年52期全套资料\nhttps://b23.tv/y5CM65f", "2020");
+        adMap.put("2019年52期全套资料\nhttps://b23.tv/BSRhboW", "2019");
+        adMap.put("2018年52期全套资料\nhttps://b23.tv/vWzWzvA", "2018");
+        adMap.put("2017年52期全套资料\nhttps://b23.tv/y5CM65f", "2017");
+
+        List<String> adList = new ArrayList<>(adMap.keySet());
+
+        // 如果 folderName 不是以 '2' 开头，则说明是历史的，将列表反转
+        if (!folderName.startsWith("2")) {
+            Collections.reverse(adList); // 反转，变为升序
+        }
+
+        StringBuilder part3 = new StringBuilder();
+        part3.append("小店资料每期包含【音频、英文pdf、双语对话、核心词汇、高级词汇表和完整词汇表】6份文档，全年共计300+文档！\n");
+        part3.append(String.join("\n", adList));
+
+        // 【第四部分】：打卡信息
+        StringBuilder part4 = new StringBuilder();
+        part4.append("宝子期期都来打卡\n");
+        part4.append("请你给视频打个分\n");
+        part4.append("宝子打卡超过99次\n");
+        part4.append("打卡199次并不难");
+
+        // 合并所有部分并写入文件
+        StringBuilder finalContent = new StringBuilder();
+        finalContent.append("【第一部分】\n");
+        finalContent.append(part1.toString()).append("\n\n");
+        finalContent.append("【第二部分】\n");
+        finalContent.append(part2.toString()).append("\n\n");
+        finalContent.append("【第三部分】\n");
+        finalContent.append(part3.toString()).append("\n\n");
+        finalContent.append("【第四部分】\n");
+        finalContent.append(part4.toString());
+
+        FileUtil.writeString(finalContent.toString(), publishFileName, StandardCharsets.UTF_8);
+        log.info("成功生成 B站 publish.txt 文件: {}", publishFileName);
     }
 }

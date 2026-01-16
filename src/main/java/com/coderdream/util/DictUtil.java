@@ -543,6 +543,20 @@ public class DictUtil {
 
             List<String> lines = Arrays.asList(translatedText.split("\n"));
 
+
+            // 增强解析逻辑：从返回结果中智能提取最后4行有效内容
+            List<String> allLines = Arrays.stream(translatedText.split("\\r?\\n"))
+                    .filter(StrUtil::isNotBlank)
+                    .toList();
+
+            // 如果有效行数大于等于4，就从列表末尾取最后4行
+            if (allLines.size() >= 4) {
+                lines = allLines.subList(allLines.size() - 4, allLines.size());
+                log.info("成功从响应末尾提取到4行翻译。");
+            } else {
+                log.warn("翻译词汇 '{}' 后返回的有效行数不足4行，实际为 {} 行。", vocInfo.getWord(), allLines.size());
+            }
+
             // 校验返回的是否是4行
             if (lines.size() == 4) {
                 // 【后处理】移除行首序号、可能存在的拼音和括号

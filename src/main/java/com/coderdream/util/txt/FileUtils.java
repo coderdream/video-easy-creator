@@ -4,6 +4,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*; // 使用 nio 包，更现代和推荐
+import java.time.DateTimeException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.stream.Stream;
 
 /**
@@ -74,18 +77,105 @@ public class FileUtils {
     }
 
     /**
+     * 在指定年份文件夹下创建所有周四的文件夹
+     *
+     * @param yearFolderPath 年份文件夹路径，如 "D:\\14_LearnEnglish\\6MinuteEnglish\\2026"
+     * @param firstThursday 年份的第一个周四，格式yyMMdd，如 "260101" 代表2026-01-01
+     */
+    public static void createThursdayFolders(String yearFolderPath, String firstThursday) {
+        // 1. 验证和解析参数
+        Path basePath = Paths.get(yearFolderPath);
+
+        // 2. 如果基础目录不存在，则创建
+        if (!Files.exists(basePath)) {
+            try {
+                Files.createDirectories(basePath);
+                System.out.println("创建年份文件夹: " + basePath);
+            } catch (IOException e) {
+                System.err.println("错误：无法创建年份文件夹 " + yearFolderPath + " - 原因: " + e.getMessage());
+                return;
+            }
+        }
+
+        // 3. 解析第一个周四日期
+        // 格式：yyMMdd，如 260101
+        if (firstThursday.length() != 6) {
+            System.err.println("错误：第一个周四日期格式不正确，应为yyMMdd格式，如 260101");
+            return;
+        }
+
+        try {
+            int year = 2000 + Integer.parseInt(firstThursday.substring(0, 2)); // 26 -> 2026
+            int month = Integer.parseInt(firstThursday.substring(2, 4));       // 01
+            int day = Integer.parseInt(firstThursday.substring(4, 6));         // 01
+
+            LocalDate currentThursday = LocalDate.of(year, month, day);
+
+            // 4. 验证是否是周四
+            if (currentThursday.getDayOfWeek() != DayOfWeek.THURSDAY) {
+                System.err.println("警告：指定的日期 " + currentThursday + " 不是周四，实际是 " +
+                                   currentThursday.getDayOfWeek());
+            }
+
+            // 5. 获取年份的最后一天
+            LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+            System.out.println("开始创建 " + year + " 年的周四文件夹...");
+            System.out.println("起始日期: " + currentThursday);
+            System.out.println("结束日期: " + endOfYear);
+
+            int folderCount = 0;
+
+            // 6. 循环创建每个周四的文件夹
+            while (currentThursday.getYear() == year && !currentThursday.isAfter(endOfYear)) {
+                // 生成文件夹名称，格式：yyMMdd
+                String folderName = String.format("%02d%02d%02d",
+                    currentThursday.getYear() % 100,  // 2026 -> 26
+                    currentThursday.getMonthValue(),
+                    currentThursday.getDayOfMonth());
+
+                Path thursdayFolder = basePath.resolve(folderName);
+
+                // 创建文件夹
+                try {
+                    if (!Files.exists(thursdayFolder)) {
+                        Files.createDirectories(thursdayFolder);
+                        System.out.println("  创建文件夹: " + folderName + " (" + currentThursday + ")");
+                        folderCount++;
+                    } else {
+                        System.out.println("  文件夹已存在: " + folderName + " (" + currentThursday + ")");
+                    }
+                } catch (IOException e) {
+                    System.err.println("  错误：无法创建文件夹 " + folderName + " - 原因: " + e.getMessage());
+                }
+
+                // 移动到下一个周四（+7天）
+                currentThursday = currentThursday.plusWeeks(1);
+            }
+
+            System.out.println("处理完成，共创建 " + folderCount + " 个周四文件夹。");
+
+        } catch (NumberFormatException e) {
+            System.err.println("错误：日期解析失败 - " + e.getMessage());
+        } catch (DateTimeException e) {
+            System.err.println("错误：无效的日期 - " + e.getMessage());
+        }
+    }
+
+    /**
      * 主方法，用于演示和执行工具类方法
      * @param args 命令行参数（未使用）
      */
     public static void main(String[] args) {
-        // --- 配置区 ---
-        // 注意：在Java字符串中，反斜杠 \ 需要转义为 \\
-        String targetBaseDirectory = "D:\\14_LearnEnglish\\6MinuteEnglish\\2025";
-        String targetFileName = "temp.txt";
-        String fileContent = "hello world!";
-        // -------------
+        // --- 示例1：在子文件夹中创建文本文件 ---
+         String targetBaseDirectory = "D:\\14_LearnEnglish\\6MinuteEnglish\\2026";
+         String targetFileName = "temp.txt";
+         String fileContent = "hello world!";
+         addTextFileToSubfolders(targetBaseDirectory, targetFileName, fileContent);
 
-        // 调用工具方法执行操作
-        addTextFileToSubfolders(targetBaseDirectory, targetFileName, fileContent);
+//        // --- 示例2：创建2026年所有周四的文件夹 ---
+//        String yearFolder = "D:\\14_LearnEnglish\\6MinuteEnglish\\2026";
+//        String firstThursday = "260101";  // 2026-01-01
+//        createThursdayFolders(yearFolder, firstThursday);
     }
 }

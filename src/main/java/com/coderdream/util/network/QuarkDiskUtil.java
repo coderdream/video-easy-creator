@@ -563,7 +563,7 @@ public class QuarkDiskUtil {
   public static void main(String[] args) {
 //    String year = "2023";
 //    List<String> years = List.of("2018", "2019", "2020", "2021", "2022", "2023");
-    List<String> years = List.of("2016");
+    List<String> years = List.of("2014");
     for (String year : years) {
       process(year);
     }

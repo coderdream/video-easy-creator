@@ -21,7 +21,9 @@ public class CdPythonUtil {
     public static File executePythonCommand(String mp3FileName, String subtitleFileName,
         String srtFileName) {
         try {
-            String pythonCommand = "python -m aeneas.tools.execute_task " + mp3FileName + " " + subtitleFileName
+            // 使用 Python 3.9 以支持 aeneas 模块
+            String python39 = com.coderdream.util.proxy.OperatingSystem.getPython39Env();
+            String pythonCommand = python39 + " -m aeneas.tools.execute_task " + mp3FileName + " " + subtitleFileName
                 + " \"task_language=eng|os_task_file_format=srt|is_text_type=plain\" "
                 + srtFileName;
             log.info("Execute python command: {}", pythonCommand);
