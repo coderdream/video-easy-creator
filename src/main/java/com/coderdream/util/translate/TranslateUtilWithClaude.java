@@ -188,16 +188,57 @@ public class TranslateUtilWithClaude {
      * @return 翻译结果
      */
     private static String callClaudeApi(String prompt) {
-        ClaudeRequest request = new ClaudeRequest()
-                .setModel(CdConstants.CLAUDE_DEFAULT_MODEL)
-                .setMaxTokens(CdConstants.CLAUDE_MAX_TOKENS)
-                .addUserMessage(prompt);
+        // 主模型和备用模型配置
+        final String PRIMARY_MODEL = "claude-sonnet-4-5-20250929";
+        final String BACKUP_MODEL = "claude-haiku-4-5-20251001";
+        final int MODEL_SWITCH_THRESHOLD = 3; // 主模型失败3次后切换
 
-        try {
-            return CLAUDE_API_CLIENT.sendMessage(request).getTextContent();
-        } catch (Exception e) {
-            log.error("Claude API 调用失败", e);
-            return "API 调用发生异常: " + e.getMessage();
+        String currentModel = PRIMARY_MODEL;
+        int errorCount = 0;
+
+        while (true) {
+            ClaudeRequest request = new ClaudeRequest()
+                    .setModel(currentModel)
+                    .setMaxTokens(CdConstants.CLAUDE_MAX_TOKENS)
+                    .addUserMessage(prompt);
+
+            try {
+                String result = CLAUDE_API_CLIENT.sendMessage(request).getTextContent();
+                // 如果使用了备用模型且成功了，下次恢复使用主模型
+                if (PRIMARY_MODEL.equals(currentModel)) {
+                    return result;
+                } else {
+                    log.info("备用模型 {} 调用成功，下次将尝试恢复主模型", currentModel);
+                    return result;
+                }
+            } catch (Exception e) {
+                errorCount++;
+                log.warn("模型 {} 调用失败 (第{}次): {}", currentModel, errorCount, e.getMessage());
+
+                // 检查是否需要切换模型
+                if (errorCount >= MODEL_SWITCH_THRESHOLD && PRIMARY_MODEL.equals(currentModel)) {
+                    log.warn("主模型 {} 失败超过{}次，切换到备用模型 {}", PRIMARY_MODEL, MODEL_SWITCH_THRESHOLD, BACKUP_MODEL);
+                    currentModel = BACKUP_MODEL;
+                    errorCount = 0; // 重置错误计数
+                } else if (BACKUP_MODEL.equals(currentModel)) {
+                    // 备用模型也失败了，继续使用备用模型重试
+                    log.warn("备用模型 {} 也失败，继续重试", BACKUP_MODEL);
+                }
+
+                // 如果是最后一次尝试，返回错误信息
+                if (errorCount >= MODEL_SWITCH_THRESHOLD && BACKUP_MODEL.equals(currentModel)) {
+                    log.error("备用模型 {} 调用失败", currentModel);
+                    return "API 调用发生异常: " + e.getMessage();
+                }
+
+                // 等待后重试
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return "API 调用被中断";
+                }
+            }
         }
     }
 
