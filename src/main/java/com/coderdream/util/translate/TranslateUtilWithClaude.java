@@ -270,6 +270,8 @@ public class TranslateUtilWithClaude {
         final int CHUNK_SIZE = 20; // 每20行作为一个翻译块
         final int MAX_API_RETRIES = 5; // API调用重试次数
         final int RETRY_INTERVAL_MS = 5000; // 重试间隔5秒
+        final int RETRY_INTERVAL_429_MS = 30000; // 429错误重试间隔30秒
+        final int CHUNK_INTERVAL_MS = 1000; // 块之间间隔1秒，避免触发限流
 
         List<List<String>> chunks = ListUtil.split(originalTextLines, CHUNK_SIZE);
         List<String> allTranslatedLines = new ArrayList<>();
@@ -314,11 +316,19 @@ public class TranslateUtilWithClaude {
                 log.info("正在调用 Claude API 翻译SRT字幕... (块 {}/{}, 尝试 {}/{})", i + 1, chunks.size(), retry + 1, MAX_API_RETRIES);
                 String translatedText = callClaudeApi(prompt);
 
-                if (StrUtil.isBlank(translatedText) || translatedText.contains("API 调用发生异常")) {
-                    log.error("Claude API 翻译SRT块失败，返回内容为空或包含错误信息。块索引: {}, 尝试: {}", i, retry + 1);
-                    if (retry < MAX_API_RETRIES - 1) {
-                        log.info("{}秒后重试...", RETRY_INTERVAL_MS / 1000);
-                        ThreadUtil.sleep(RETRY_INTERVAL_MS);
+                // 检测是否是429错误
+                boolean is429Error = StrUtil.isNotBlank(translatedText) && translatedText.contains("Too Many Requests");
+
+                if (StrUtil.isBlank(translatedText) || translatedText.contains("API 调用发生异常") || is429Error) {
+                    if (is429Error) {
+                        log.warn("检测到 429 错误（速率限制），{}秒后重试...", RETRY_INTERVAL_429_MS / 1000);
+                        ThreadUtil.sleep(RETRY_INTERVAL_429_MS);
+                    } else {
+                        log.error("Claude API 翻译SRT块失败，返回内容为空或包含错误信息。块索引: {}, 尝试: {}", i, retry + 1);
+                        if (retry < MAX_API_RETRIES - 1) {
+                            log.info("{}秒后重试...", RETRY_INTERVAL_MS / 1000);
+                            ThreadUtil.sleep(RETRY_INTERVAL_MS);
+                        }
                     }
                     continue; // 继续下一次重试
                 }
@@ -359,6 +369,13 @@ public class TranslateUtilWithClaude {
                     log.info("成功写入临时文件: {}", partFileName);
                     allTranslatedLines.addAll(translatedChunkLines);
                     chunkSuccess = true;
+
+                    // 块翻译成功后，等待一段时间再处理下一个块，避免触发限流
+                    if (i < chunks.size() - 1) {
+                        log.debug("块 {} 翻译完成，等待 {}ms 后处理下一个块", i + 1, CHUNK_INTERVAL_MS);
+                        ThreadUtil.sleep(CHUNK_INTERVAL_MS);
+                    }
+
                     break; // 当前块成功，跳出重试循环
                 } else {
                     log.error("SRT翻译块内容校验失败! 块索引: {}, 尝试: {}, 发现未翻译的行: {}", i, retry + 1, untranslatedLinesInChunk);
