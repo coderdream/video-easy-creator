@@ -582,4 +582,22 @@ public class TranslateUtilWithClaude {
 
         return FileUtil.writeString(description, descriptionFileName, StandardCharsets.UTF_8);
     }
+
+    /**
+     * 通用内容生成方法（替换 Gemini API）
+     *
+     * @param prompt 提示词
+     * @return 生成的内容
+     */
+    public static String generateContent(String prompt) {
+        log.info("正在调用 Claude API 生成内容...");
+        String result = callClaudeApi(prompt);
+
+        if (StrUtil.isBlank(result) || result.contains("API 调用发生异常")) {
+            log.error("Claude API 生成内容失败");
+            return "API 调用发生异常";
+        }
+
+        return result;
+    }
 }
