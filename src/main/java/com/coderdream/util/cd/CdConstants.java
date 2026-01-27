@@ -194,6 +194,10 @@ public class CdConstants {
 
   public static final String GEMINI_API_KEY = "AIzaSyAIrJl7ngroAysbkhFPdsZNi3b3YBReIBI";// System.getenv("GEMINI_API_KEY");
   public static final String GROK_API_KEY = "xai-5KRGYNaegWzP3x1C4nxlHvV21WCmCufOYXnaz8FIZAi2k599bkwAQFc5Idq7IF0LKQjQ8c5mEyh9SXki";//System.getenv("GROK_API_KEY");
+  public static final String NVIDIA_API_KEY = "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";
+  public static final String CODEX_API_KEY = "cr_5f730e8a9831c932153764a2bd1b1f5bb1b77fc07f960e358a08688a7ba355fd";
+  public static final String CODEX_API_BASE_URL = "https://gmn.chuangzuoli.cn/openai";
+  public static final String CODEX_MODEL = "gpt-5-codex";
 
   // proxy-host 127.0.0.1
   public static final String PROXY_HOST = "127.0.0.1";
@@ -282,6 +286,10 @@ public class CdConstants {
 
   public static final String TRANSLATE_PLATFORM_MSTTS = "mstts";
 
+  public static final String AI_PROVIDER_GEMINI = "gemini";
+  public static final String AI_PROVIDER_NVIDIA = "nvidia";
+  public static final String AI_PROVIDER_CODEX = "codex";
+
   public static final String SUBTITLE_EN = "en";
 
   public static final String SUBTITLE_ZH_CN = "zh-CN";
@@ -300,5 +308,77 @@ public class CdConstants {
   public static final String PYTHON39_PATH_WINDOWS = "C:\\Program Files\\Python39\\python.exe";
   public static final String PYTHON39_PATH_MAC = "/usr/local/bin/python3.9";
   public static final String PYTHON39_PATH_LINUX = "/usr/bin/python3.9";
+
+  // ==================== Claude API 配置 ====================
+
+  /**
+   * Claude Opus 4.5 模型（最强编码能力）
+   */
+  public static final String CLAUDE_MODEL_OPUS_45 = "claude-opus-4-5-20251101";
+
+  /**
+   * Claude Sonnet 4.5 模型（平衡性能和成本）
+   */
+  public static final String CLAUDE_MODEL_SONNET_45 = "claude-sonnet-4-5-20250929";
+
+  /**
+   * Claude Haiku 4.5 模型（轻量级，快速响应）
+   */
+  public static final String CLAUDE_MODEL_HAIKU_45 = "claude-haiku-4-5-20251001";
+
+  /**
+   * 默认使用的 Claude 模型
+   */
+  public static final String CLAUDE_DEFAULT_MODEL = CLAUDE_MODEL_SONNET_45;
+
+  /**
+   * Claude API 最大输出 Token 数
+   */
+  public static final int CLAUDE_MAX_TOKENS = 4096;
+
+  /**
+   * Claude 思考模式预算（Token 数）
+   */
+  public static final int CLAUDE_THINKING_BUDGET = 2048;
+
+  /**
+   * Claude 努力程度：高（最深入的推理）
+   */
+  public static final String CLAUDE_EFFORT_HIGH = "high";
+
+  /**
+   * Claude 努力程度：中（平衡推理）
+   */
+  public static final String CLAUDE_EFFORT_MEDIUM = "medium";
+
+  /**
+   * Claude 努力程度：低（快速响应）
+   */
+  public static final String CLAUDE_EFFORT_LOW = "low";
+
+  /**
+   * Claude API 版本
+   */
+  public static final String CLAUDE_API_VERSION = "2023-06-01";
+
+  /**
+   * Claude API 调用超时时间（毫秒）
+   */
+  public static final int CLAUDE_API_TIMEOUT = 120000;
+
+  /**
+   * Claude API 最大重试次数
+   */
+  public static final int CLAUDE_MAX_RETRIES = 3;
+
+  /**
+   * Claude API 重试延迟（毫秒）
+   */
+  public static final int CLAUDE_RETRY_DELAY = 2000;
+
+  /**
+   * Claude 工具调用循环最大迭代次数
+   */
+  public static final int CLAUDE_TOOL_LOOP_MAX_ITERATIONS = 10;
 
 }

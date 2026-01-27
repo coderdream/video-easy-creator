@@ -8,6 +8,8 @@ import com.coderdream.util.CommonUtil;
 import com.coderdream.util.cd.CdConstants;
 import com.coderdream.util.cd.CdFileUtil;
 import com.coderdream.util.cd.CdTextUtil;
+import com.coderdream.util.codex.CodexApiClient;
+import com.coderdream.util.nvidia.NvidiaTranslateUtil;
 import com.coderdream.util.process.ListSplitterStream;
 import com.coderdream.util.sentence.demo1.SentenceParser;
 import com.coderdream.vo.SentenceVO;
@@ -44,6 +46,15 @@ public class TranslationUtil {
    * @param fileName    文件名，用于存储翻译结果
    */
   public static void processVoc(List<VocInfo> vocInfoList, String fileName) {
+    processVoc(vocInfoList, fileName, CdConstants.AI_PROVIDER_CODEX);
+  }
+
+  public static void processVoc(List<VocInfo> vocInfoList, String fileName,
+    String provider) {
+    if (CollectionUtil.isEmpty(vocInfoList)) {
+      log.error("词汇列表为空，无法翻译。");
+      return;
+    }
     StringBuilder text = new StringBuilder(
       CdConstants.VOC_CN_PREFIX);  // 使用 StringBuilder 拼接字符串，避免多次创建字符串对象
 
@@ -54,9 +65,19 @@ public class TranslationUtil {
     }
 
     // 调用翻译方法并记录日志
-    log.info("开始翻译文本内容，包含 {} 个词汇", vocInfoList.size());
+    String providerName = StrUtil.blankToDefault(provider,
+      CdConstants.AI_PROVIDER_GEMINI);
+    log.info("开始翻译文本内容，包含 {} 个词汇，provider: {}", vocInfoList.size(),
+      providerName);
 
-    String result = GeminiApiClient.generateContent(text.toString());  // 翻译文本
+    String result;
+    if (CdConstants.AI_PROVIDER_NVIDIA.equalsIgnoreCase(providerName)) {
+      result = NvidiaTranslateUtil.requestCompletion(text.toString());
+    } else if (CdConstants.AI_PROVIDER_CODEX.equalsIgnoreCase(providerName)) {
+      result = CodexApiClient.generateContent(text.toString());
+    } else {
+      result = GeminiApiClient.generateContent(text.toString());
+    }
 
     // 记录翻译后的结果日志
     log.info("翻译完成，开始写入文件: {}", fileName);

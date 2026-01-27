@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+本文件为 Claude Code (claude.ai/code) 在此代码仓库中工作时提供指导。
+
 ## 项目概述
 
 **video-easy-creator** 是一个高度自动化的视频生成系统,专门用于生成教育类英语学习视频(特别是BBC六分钟英语课程)。系统集成了多个AI服务、音视频处理工具,实现从原始文本到最终视频的全流程自动化。
@@ -209,7 +211,9 @@ VocInfo {
 4. **MySQL数据库**
    - 端口: 3306
    - 数据库: dictionary_db
-   - 配置: `application.yml`
+   - 用户名: root
+   - 密码: 123456 (在 `application.yml` 中配置)
+   - 初始化: 运行 `mvn test` 时会自动创建表结构
 
 5. **Ollama**(可选,离线场景)
    - 本地LLM服务
@@ -231,6 +235,16 @@ export OPENAI_API_KEY=your_key_here
 # 代理配置(可选)
 export PROXY_HOST=127.0.0.1
 export PROXY_PORT=7890
+```
+
+### 数据库初始化
+
+```bash
+# 创建数据库
+mysql -u root -p123456 -e "CREATE DATABASE IF NOT EXISTS dictionary_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# 表结构会在首次运行测试时自动创建
+mvn test -Dtest=SixMinutesStepByStepTest#testStep00
 ```
 
 ## 重要的文件路径约定
@@ -344,3 +358,104 @@ Aspose Slides 使用本地JAR: `lib/aspose-slides-24.5-jdk16.jar`
 5. **字符编码**: 项目统一使用UTF-8编码
 6. **重试机制**: AI调用和TTS调用都有重试机制,避免手动重试
 7. **日志记录**: 关键步骤都有详细日志,便于调试和监控
+
+## 常见问题排查
+
+### 数据库连接失败
+```
+错误: Communications link failure
+解决:
+1. 确保MySQL服务已启动
+2. 检查 application.yml 中的数据库配置
+3. 验证数据库用户名和密码
+4. 确保 dictionary_db 数据库已创建
+```
+
+### Gemini API调用失败
+```
+错误: API key not found / Invalid API key
+解决:
+1. 检查 GEMINI_API_KEY 环境变量是否设置
+2. 验证API密钥是否有效
+3. 检查网络连接和代理配置
+4. 查看日志中的详细错误信息
+```
+
+### Azure TTS音频生成失败
+```
+错误: Authentication failed / Service unavailable
+解决:
+1. 验证 SPEECH_KEY_EAST_US 和 SPEECH_KEY_EASTASIA 环境变量
+2. 检查Azure服务配额是否已用尽
+3. 确保网络连接正常
+4. 查看 GenDualAudioUtil 的重试日志
+```
+
+### FFmpeg命令执行失败
+```
+错误: Cannot run program "ffmpeg"
+解决:
+1. 确保FFmpeg已安装: ffmpeg -version
+2. 检查系统PATH环境变量是否包含FFmpeg路径
+3. 在Windows上,可能需要重启IDE使环境变量生效
+```
+
+### 测试超时
+```
+错误: Test execution timed out
+解决:
+1. 增加Maven超时时间: mvn -DargLine="-Xmx2g" test
+2. 检查系统资源(CPU/内存)是否充足
+3. 运行单个步骤而不是完整流程进行调试
+```
+
+### 字幕或音频文件生成为空
+```
+错误: Empty subtitle/audio files
+解决:
+1. 检查输入脚本文件格式是否正确
+2. 验证翻译结果是否成功(查看 *_cn.txt 文件)
+3. 检查音频生成日志中的错误信息
+4. 确保所有必需的API密钥都已配置
+```
+
+## Spring AI提供商切换
+
+项目支持多个AI提供商,可在 `application.yml` 中配置:
+
+```yaml
+# 使用OpenAI (ChatGPT)
+spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-3.5-turbo
+
+# 使用Ollama (本地LLM)
+spring:
+  ai:
+    ollama:
+      base-url: http://192.168.3.165:11434
+      chat:
+        model: SiliconBasedWorld/Qwen2.5-7B-Instruct-1M:latest
+```
+
+## 新增模块说明
+
+### Codex API客户端 (`com.coderdream.util.codex`)
+- 用途: 备选代码生成和翻译服务
+- 配置: `CdConstants.CODEX_API_KEY`
+- 测试: `CodexApiClientTest`
+
+### Nvidia翻译工具 (`com.coderdream.util.nvidia`)
+- 用途: 使用Nvidia服务进行文本翻译
+- 配置: 需要Nvidia API密钥
+- 测试: `NvidiaTranslateUtilTest`
+
+## 注意事项
+- 用utf-8读写文档
+- 分析、解析、解答全程都用中文。
+- 生成任务清单，写入 TODOS_XXX.md 放到 docs/todos/ 文件夹下，记录任务完成的过程。
+- 生成解决方案，写入 SOLUTION_XXX.md 放到 docs/solution/ 文件夹下，记录开发的方案。

@@ -1,5 +1,6 @@
 package com.coderdream.util.claudecode;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
@@ -174,13 +175,29 @@ public class ClaudeApiClient {
     private ClaudeResponse executeRequest(JSONObject body) {
         try {
             String url = baseUrl + "/v1/messages";
-            log.debug("发送请求到: {}", url);
+
+            // 从请求体中提取模型名称
+            String model = body.getStr("model", "unknown");
+            log.info("使用模型: {}", model);
+
+            // 打印完整的请求详情（用于Apifox调试）
+            String requestBodyStr = JSONUtil.toJsonStr(body);
+            log.info("========== Claude API 请求详情 ==========");
+            log.info("【URL】: {}", url);
+            log.info("【Method】: POST");
+            log.info("【Headers】:");
+            log.info("  - Content-Type: application/json");
+            log.info("  - x-api-key: {}", authToken != null ? authToken.substring(0, Math.min(10, authToken.length())) + "..." : "null");
+            log.info("  - anthropic-version: {}", apiVersion);
+            log.info("【Request Body】:");
+            log.info("{}", requestBodyStr);
+            log.info("==========================================");
 
             HttpRequest httpRequest = HttpRequest.post(url)
                     .header(Header.CONTENT_TYPE, "application/json")
                     .header("x-api-key", authToken)
                     .header("anthropic-version", apiVersion)
-                    .body(JSONUtil.toJsonStr(body))
+                    .body(requestBodyStr)
                     .timeout(timeout);
 
             // 配置代理
@@ -190,7 +207,9 @@ public class ClaudeApiClient {
             }
 
             String responseStr = httpRequest.execute().body();
-            log.debug("API 响应已接收，长度: {}", responseStr.length());
+
+            // 打印中转平台返回的原始响应内容（用于监控和分析）
+            log.info("中转平台原始响应 (模型: {}, 长度: {}): {}", model, responseStr.length(), responseStr);
 
             return parseResponse(responseStr);
         } catch (Exception e) {
@@ -207,7 +226,36 @@ public class ClaudeApiClient {
      * @throws RuntimeException 如果响应包含错误
      */
     private ClaudeResponse parseResponse(String responseStr) {
-        JSONObject json = JSONUtil.parseObj(responseStr);
+        // 首先检查响应是否为空或包含错误信息
+        if (StrUtil.isBlank(responseStr)) {
+            log.error("API 响应为空");
+            throw new RuntimeException("API 响应为空");
+        }
+
+        // 检查是否包含错误关键词
+        if (responseStr.contains("Too Many Requests") ||
+            responseStr.contains("429") ||
+            responseStr.contains("Bad Request") ||
+            responseStr.contains("400") ||
+            responseStr.contains("API 错误") ||
+            responseStr.contains("error")) {
+            log.warn("API 返回错误信息: {}", responseStr.substring(0, Math.min(200, responseStr.length())));
+            throw new RuntimeException("API Error: " + responseStr);
+        }
+
+        // 尝试检查响应是否以 { 开头（应该是JSON）
+        if (!responseStr.trim().startsWith("{")) {
+            log.error("API 响应不是有效的JSON格式: {}", responseStr.substring(0, Math.min(200, responseStr.length())));
+            throw new RuntimeException("非JSON响应: " + responseStr);
+        }
+
+        JSONObject json;
+        try {
+            json = JSONUtil.parseObj(responseStr);
+        } catch (Exception e) {
+            log.error("JSON解析失败，响应内容: {}", responseStr.substring(0, Math.min(500, responseStr.length())));
+            throw new RuntimeException("JSON解析失败: " + e.getMessage() + ", 响应: " + responseStr);
+        }
 
         // 检查错误
         if (json.containsKey("error")) {

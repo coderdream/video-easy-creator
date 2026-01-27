@@ -337,13 +337,27 @@ public class QuarkDiskUtil {
     Map<String, String> headers = readHeadersFromFile(headerFilePath);
     Map<String, Object> paramMap = BeanUtil.beanToMap(params);
     String url = URL + "?" + HttpUtil.toParams(paramMap); // 手动拼接URL参数
-    // log.info("GET File Sort - Request URL: {}", url); // 打印请求 URL
+
+    // 打印请求详情
+    log.info("========== GET File Sort Request ==========");
+    log.info("Request URL: {}", url);
+    log.info("Request Headers:");
+    headers.forEach((key, value) -> log.info("  {} : {}", key, value));
+    log.info("Request Params: {}", JSONUtil.toJsonStr(paramMap));
 
     HttpRequest request = HttpUtil.createGet(url);
     headers.forEach(request::header); // 添加请求头
     try (HttpResponse response = request.execute()) { // 使用 try-with-resources
       String body = response.body();
-      log.debug("Response body: {}", body); // 改为debug级别
+
+      // 打印响应详情
+      log.info("========== GET File Sort Response ==========");
+      log.info("Response Status: {}", response.getStatus());
+      log.info("Response Headers:");
+      response.headers().forEach((key, values) ->
+        log.info("  {} : {}", key, String.join(", ", values)));
+      log.info("Response Body: {}", body);
+      log.info("===========================================");
 
       if (response.isOk()) {
         return JSONUtil.toBean(body, QuarkDiskResponse.class);
@@ -352,7 +366,7 @@ public class QuarkDiskUtil {
         return null; // 或者抛出异常
       }
     } catch (Exception e) {
-      log.error("GET File Sort Request error:{}", e.getMessage());
+      log.error("GET File Sort Request error:{}", e.getMessage(), e);
       return null;
     }
   }
@@ -366,24 +380,36 @@ public class QuarkDiskUtil {
     Map<String, String> headers = readHeadersFromFile(headerFilePath);
     String jsonBody = JSONUtil.toJsonStr(params);
 
-    // log.info("POST Share - Request URL: {}", SHARE_URL); // 打印请求 URL
-    // log.info("POST Share - Request Body: {}", jsonBody); // 打印请求 JSON
+    // 打印请求详情
+    log.info("========== POST Share Request ==========");
+    log.info("Request URL: {}", SHARE_URL);
+    log.info("Request Headers:");
+    headers.forEach((key, value) -> log.info("  {} : {}", key, value));
+    log.info("Request Body: {}", jsonBody);
 
     HttpRequest request = HttpUtil.createPost(SHARE_URL).body(jsonBody);
     headers.forEach(request::header);
 
     try (HttpResponse response = request.execute()) {
       String body = response.body();
-      // log.debug("Response body: {}", body); // 改为debug级别
+
+      // 打印响应详情
+      log.info("========== POST Share Response ==========");
+      log.info("Response Status: {}", response.getStatus());
+      log.info("Response Headers:");
+      response.headers().forEach((key, values) ->
+        log.info("  {} : {}", key, String.join(", ", values)));
+      log.info("Response Body: {}", body);
+      log.info("===========================================");
 
       if (response.isOk()) {
         return JSONUtil.toBean(body, ShareResponse.class);
       } else {
-        // log.error("POST Share Request failed with status code: {}", response.getStatus());
+        log.error("POST Share Request failed with status code: {}", response.getStatus());
         return null;
       }
     } catch (Exception e) {
-      // log.error("POST Share Request error:{}", e.getMessage());
+      log.error("POST Share Request error:{}", e.getMessage(), e);
       return null;
     }
   }
@@ -401,33 +427,43 @@ public class QuarkDiskUtil {
           + taskId
           + "&retry_index="
           + retry;
-      // log.info("GET Task (Retry {}/{}) - Request URL: {}", retry, maxRetries, url); // 打印请求 URL
+
+      // 打印请求详情
+      log.info("========== GET Task Request (Retry {}/{}) ==========", retry, maxRetries);
+      log.info("Request URL: {}", url);
+      log.info("Request Headers:");
+      headers.forEach((key, value) -> log.info("  {} : {}", key, value));
 
       HttpRequest request = HttpUtil.createGet(url);
       headers.forEach(request::header);
 
       try (HttpResponse response = request.execute()) {
         String body = response.body();
-        // log.info("Task Response body: {}", body); // 打印返回body
+
+        // 打印响应详情
+        log.info("========== GET Task Response (Retry {}/{}) ==========", retry, maxRetries);
+        log.info("Response Status: {}", response.getStatus());
+        log.info("Response Headers:");
+        response.headers().forEach((key, values) ->
+          log.info("  {} : {}", key, String.join(", ", values)));
+        log.info("Response Body: {}", body);
+        log.info("===========================================");
 
         if (response.isOk()) {
           TaskResponse taskResponse = JSONUtil.toBean(body, TaskResponse.class);
           if (taskResponse != null
             && taskResponse.getData() != null
             && !StrUtil.isBlank(taskResponse.getData().getShare_id())) {
-            // log.info("Successfully extracted shareId on retry: {}", retry);
+            log.info("Successfully extracted shareId on retry: {}", retry);
             return taskResponse; // 成功获取 shareId，返回
           } else {
-            // log.warn(
-//                "shareId is blank on retry {}. Full response: {}",
-//                retry,
-//                body); // 打印完整body
+            log.warn("shareId is blank on retry {}. Full response: {}", retry, body);
           }
         } else {
-          // log.error("Task GET request failed with status code: {}", response.getStatus());
+          log.error("Task GET request failed with status code: {}", response.getStatus());
         }
       } catch (Exception e) {
-        // log.error("Task GET request error:{}", e.getMessage());
+        log.error("Task GET request error:{}", e.getMessage(), e);
       }
 
       // 重试前休眠 5 秒
@@ -435,12 +471,12 @@ public class QuarkDiskUtil {
         Thread.sleep(BEFORE_RETRY_SLEEP_MS);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
-        // log.error("Thread interrupted: {}", e.getMessage());
+        log.error("Thread interrupted: {}", e.getMessage());
         return null;
       }
     }
 
-    // log.error("Failed to extract shareId after {} retries for taskId: {}", maxRetries, taskId);
+    log.error("Failed to extract shareId after {} retries for taskId: {}", maxRetries, taskId);
     return null; // 超过最大重试次数，返回 null
   }
 
@@ -455,8 +491,13 @@ public class QuarkDiskUtil {
     params.setShare_id(shareId);
 
     String jsonBody = JSONUtil.toJsonStr(params);
-    // log.info("POST Share Password - Request URL: {}", SHARE_PASSWORD_URL); // 打印请求 URL
-    // log.info("POST Share Password - Request Body: {}", jsonBody); // 打印请求 JSON
+
+    // 打印请求详情
+    log.info("========== POST Share Password 请求 ==========");
+    log.info("请求 URL: {}", SHARE_PASSWORD_URL);
+    log.info("请求 Headers:");
+    headers.forEach((key, value) -> log.info("  {} : {}", key, value));
+    log.info("请求 Body: {}", jsonBody);
 
     HttpRequest request = HttpUtil.createPost(SHARE_PASSWORD_URL)
       .body(jsonBody);
@@ -464,16 +505,24 @@ public class QuarkDiskUtil {
 
     try (HttpResponse response = request.execute()) {
       String body = response.body();
-      // log.debug("Share Password Response body: {}", body); // 改为debug级别
+
+      // 打印响应详情
+      log.info("========== POST Share Password 响应 ==========");
+      log.info("响应状态码: {}", response.getStatus());
+      log.info("响应 Headers:");
+      response.headers().forEach((key, values) ->
+        log.info("  {} : {}", key, String.join(", ", values)));
+      log.info("响应 Body: {}", body);
+      log.info("===========================================");
 
       if (response.isOk()) {
         return JSONUtil.toBean(body, SharePasswordResponse.class);
       } else {
-        // log.error("Share Password POST request failed with status code: {}", response.getStatus());
+        log.error("Share Password POST 请求失败，状态码: {}", response.getStatus());
         return null;
       }
     } catch (Exception e) {
-      // log.error("Share Password POST request error:{}", e.getMessage());
+      log.error("Share Password POST 请求异常:{}", e.getMessage(), e);
       return null;
     }
   }
@@ -563,7 +612,7 @@ public class QuarkDiskUtil {
   public static void main(String[] args) {
 //    String year = "2023";
 //    List<String> years = List.of("2018", "2019", "2020", "2021", "2022", "2023");
-    List<String> years = List.of("2014");
+    List<String> years = List.of("2026");
     for (String year : years) {
       process(year);
     }

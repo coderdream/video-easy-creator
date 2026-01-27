@@ -280,3 +280,5 @@ output/171214.png
 output/171221.png
 output/171228.png
 /logs/
+# 配置文件（包含敏感信息，不上传）
+config.properties

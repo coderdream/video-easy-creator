@@ -1,0 +1,6 @@
+<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+  <voice name="en-US-JennyNeural">
+    <prosody pitch="default" volume="default" rate="default">
+Me too. The sky there is really clear. We can see a lot of constellations.     </prosody>
+  </voice>
+</speak>
