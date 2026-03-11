@@ -1,0 +1,196 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.coderdream:video-easy-creator:jar:0.0.1-SNAPSHOT
+[WARNING] 'dependencies.dependency.systemPath' for com.aspose:aspose-slides:jar should not point at files within the project directory, ${basedir}/lib/aspose-slides-24.5-jdk16.jar will be unresolvable by dependent projects @ line 550, column 25
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] -----------------< com.coderdream:video-easy-creator >------------------
+[INFO] Building video-easy-creator 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from geotoolkit: https://maven.geotoolkit.org/com/aliyun/tea-util/maven-metadata.xml
+[WARNING] Could not transfer metadata com.aliyun:tea-util/maven-metadata.xml from/to geotoolkit (https://maven.geotoolkit.org/): 不知道这样的主机。 (maven.geotoolkit.org)
+Downloading from geotoolkit: https://maven.geotoolkit.org/com/aliyun/tea-rpc-util/maven-metadata.xml
+[WARNING] Could not transfer metadata com.aliyun:tea-rpc-util/maven-metadata.xml from/to geotoolkit (https://maven.geotoolkit.org/): maven.geotoolkit.org
+[WARNING] com.aliyun:tea-util/maven-metadata.xml failed to transfer from https://maven.geotoolkit.org/ during a previous attempt. This failure was cached in the local repository and resolution will not be reattempted until the update interval of geotoolkit has elapsed or updates are forced. Original error: Could not transfer metadata com.aliyun:tea-util/maven-metadata.xml from/to geotoolkit (https://maven.geotoolkit.org/): 不知道这样的主机。 (maven.geotoolkit.org)
+[WARNING] com.aliyun:tea-rpc-util/maven-metadata.xml failed to transfer from https://maven.geotoolkit.org/ during a previous attempt. This failure was cached in the local repository and resolution will not be reattempted until the update interval of geotoolkit has elapsed or updates are forced. Original error: Could not transfer metadata com.aliyun:tea-rpc-util/maven-metadata.xml from/to geotoolkit (https://maven.geotoolkit.org/): maven.geotoolkit.org
+Downloading from geotoolkit: https://maven.geotoolkit.org/com/aliyun/tea/maven-metadata.xml
+[WARNING] Could not transfer metadata com.aliyun:tea/maven-metadata.xml from/to geotoolkit (https://maven.geotoolkit.org/): maven.geotoolkit.org
+Downloading from geotoolkit: https://maven.geotoolkit.org/org/jetbrains/annotations/maven-metadata.xml
+[WARNING] Could not transfer metadata org.jetbrains:annotations/maven-metadata.xml from/to geotoolkit (https://maven.geotoolkit.org/): maven.geotoolkit.org
+[WARNING] org.jetbrains:annotations/maven-metadata.xml failed to transfer from https://maven.geotoolkit.org/ during a previous attempt. This failure was cached in the local repository and resolution will not be reattempted until the update interval of geotoolkit has elapsed or updates are forced. Original error: Could not transfer metadata org.jetbrains:annotations/maven-metadata.xml from/to geotoolkit (https://maven.geotoolkit.org/): maven.geotoolkit.org
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ video-easy-creator ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 168 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.8.1:compile (default-compile) @ video-easy-creator ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 905 source files to D:\04_GitHub\video-easy-creator\target\classes
+[INFO] /D:/04_GitHub/video-easy-creator/src/main/java/com/coderdream/util/markdown/demo03/MarkdownToWordConverter.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /D:/04_GitHub/video-easy-creator/src/main/java/com/coderdream/util/markdown/demo03/MarkdownToWordConverter.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] /D:/04_GitHub/video-easy-creator/src/main/java/com/coderdream/util/claudecode/tool/ToolDefinition.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /D:/04_GitHub/video-easy-creator/src/main/java/com/coderdream/util/claudecode/tool/ToolDefinition.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ video-easy-creator ---
+[INFO] Copying 3 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.8.1:testCompile (default-testCompile) @ video-easy-creator ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 144 source files to D:\04_GitHub\video-easy-creator\target\test-classes
+[INFO] /D:/04_GitHub/video-easy-creator/src/test/java/com/coderdream/util/claudecode/ClaudeApiClientTest.java: D:\04_GitHub\video-easy-creator\src\test\java\com\coderdream\util\claudecode\ClaudeApiClientTest.java使用或覆盖了已过时的 API。
+[INFO] /D:/04_GitHub/video-easy-creator/src/test/java/com/coderdream/util/claudecode/ClaudeApiClientTest.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ video-easy-creator ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.coderdream.util.process.bbc.SixMinutesStepByStepWithClaudeCodeTest
+SLF4J(W): Class path contains multiple SLF4J providers.
+SLF4J(W): Found provider [ch.qos.logback.classic.spi.LogbackServiceProvider@19932c16]
+SLF4J(W): Found provider [org.slf4j.simple.SimpleServiceProvider@73eb439a]
+SLF4J(W): Found provider [org.tinylog.slf4j.TinylogSlf4jServiceProvider@514646ef]
+SLF4J(W): See https://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+08:14:17,593 |-INFO in ch.qos.logback.classic.LoggerContext[default] - This is logback-classic version 1.5.12
+08:14:17,596 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - Here is a list of configurators discovered as a service, by rank: 
+08:14:17,597 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 -   org.springframework.boot.logging.logback.RootLogLevelConfigurator
+08:14:17,597 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - They will be invoked in order until ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY is returned.
+08:14:17,597 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - Constructed configurator of type class org.springframework.boot.logging.logback.RootLogLevelConfigurator
+08:14:17,604 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - org.springframework.boot.logging.logback.RootLogLevelConfigurator.configure() call lasted 0 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+08:14:17,604 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - Trying to configure with ch.qos.logback.classic.joran.SerializedModelConfigurator
+08:14:17,605 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - Constructed configurator of type class ch.qos.logback.classic.joran.SerializedModelConfigurator
+08:14:17,607 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.scmo]
+08:14:17,607 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback.scmo]
+08:14:17,607 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - ch.qos.logback.classic.joran.SerializedModelConfigurator.configure() call lasted 2 milliseconds. ExecutionStatus=INVOKE_NEXT_IF_ANY
+08:14:17,607 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - Trying to configure with ch.qos.logback.classic.util.DefaultJoranConfigurator
+08:14:17,607 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - Constructed configurator of type class ch.qos.logback.classic.util.DefaultJoranConfigurator
+08:14:17,609 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.xml]
+08:14:17,614 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Found resource [logback.xml] at [file:/D:/04_GitHub/video-easy-creator/target/classes/logback.xml]
+08:14:17,718 |-WARN in ch.qos.logback.core.model.processor.AppenderModelHandler - Appender named [STDOUT] not referenced. Skipping further processing.
+08:14:17,718 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - Processing appender named [CONSOLE]
+08:14:17,718 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - About to instantiate appender of type [ch.qos.logback.core.ConsoleAppender]
+08:14:17,729 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@68044f4 - value "%d{yyyy-MM-dd HH:mm:ss.SSS} [%cyan(%thread)] [%highlight(%-5level)] [%green(%logger{56})]: %highlight(%msg) %n" substituted for "${LOG_COLOR_FORMAT}"
+08:14:17,749 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - Processing appender named [FAILED_VIDEO_LOG]
+08:14:17,749 |-INFO in ch.qos.logback.core.model.processor.AppenderModelHandler - About to instantiate appender of type [ch.qos.logback.core.FileAppender]
+08:14:17,753 |-INFO in ch.qos.logback.core.model.processor.ModelInterpretationContext@68044f4 - value "logs/failed_video_%d{yyyy-MM-dd_HH-mm}.log" substituted for "${LOG_DIR:-logs}/failed_video_%d{yyyy-MM-dd_HH-mm}.log"
+08:14:17,753 |-INFO in ch.qos.logback.core.model.processor.ImplicitModelHandler - Assuming default type [ch.qos.logback.classic.encoder.PatternLayoutEncoder] for [encoder] property
+08:14:17,754 |-INFO in ch.qos.logback.core.FileAppender[FAILED_VIDEO_LOG] - File property is set to [logs/failed_video_%d{yyyy-MM-dd_HH-mm}.log]
+08:14:17,756 |-INFO in ch.qos.logback.classic.model.processor.RootLoggerModelHandler - Setting level of ROOT logger to TRACE
+08:14:17,756 |-INFO in ch.qos.logback.core.model.processor.AppenderRefModelHandler - Attaching appender named [CONSOLE] to Logger[ROOT]
+08:14:17,757 |-INFO in ch.qos.logback.classic.model.processor.LoggerModelHandler - Setting level of logger [FailedVideoLogger] to ERROR
+08:14:17,757 |-INFO in ch.qos.logback.core.model.processor.AppenderRefModelHandler - Attaching appender named [FAILED_VIDEO_LOG] to Logger[FailedVideoLogger]
+08:14:17,757 |-INFO in ch.qos.logback.core.model.processor.DefaultProcessor@52d239ba - End of configuration.
+08:14:17,758 |-INFO in ch.qos.logback.classic.joran.JoranConfigurator@315f43d5 - Registering current configuration as safe fallback point
+08:14:17,758 |-INFO in ch.qos.logback.classic.util.ContextInitializer@256f8274 - ch.qos.logback.classic.util.DefaultJoranConfigurator.configure() call lasted 151 milliseconds. ExecutionStatus=DO_NOT_INVOKE_NEXT_IF_ANY
+
+SLF4J(I): Actual provider is of type [ch.qos.logback.classic.spi.LogbackServiceProvider@19932c16]
+2026-03-06 08:14:17.763 [main] [INFO ] [c.c.u.process.bbc.SixMinutesStepByStepWithClaudeCodeTest]: ========【参数化测试数据源初始化：读取todo.txt】======== 
+2026-03-06 08:14:17.846 [main] [INFO ] [c.c.u.process.bbc.SixMinutesStepByStepWithClaudeCodeTest]: 
+========【07. 合并为中英双语脚本 | 260305】======== 
+2026-03-06 08:14:17.855 [main] [INFO ] [com.coderdream.util.translate.TranslateUtilWithClaude]: 初始化 Claude API 客户端: baseUrl=http://101.126.154.90:3000/api, authToken=*** 
+2026-03-06 08:14:17.858 [main] [INFO ] [com.coderdream.util.claudecode.ClaudeApiClient]: ClaudeApiClient 已初始化，baseUrl: http://101.126.154.90:3000/api 
+2026-03-06 08:14:17.858 [main] [INFO ] [com.coderdream.util.claudecode.ClaudeApiClient]: 代理已禁用，将直接连接 
+两个脚本格式不对，实体大小分别为：36	:	35
+2026-03-06 08:14:17.862 [main] [INFO ] [com.coderdream.util.cd.CdFileUtil]: 开始写入文件: D:\14_LearnEnglish\6MinuteEnglish\2026\260305\260305_中英双语对话脚本.txt 
+2026-03-06 08:14:17.863 [main] [INFO ] [com.coderdream.util.cd.CdFileUtil]: 文件写入成功: D:\14_LearnEnglish\6MinuteEnglish\2026\260305\260305_中英双语对话脚本.txt 
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.411 s <<< FAILURE! -- in com.coderdream.util.process.bbc.SixMinutesStepByStepWithClaudeCodeTest
+[ERROR] com.coderdream.util.process.bbc.SixMinutesStepByStepWithClaudeCodeTest.test07_MergeBilingualScript(String)[1] -- Time elapsed: 0.046 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 合并后的中英双语对话脚本.txt 内容为空白 ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+	at com.coderdream.util.process.bbc.SixMinutesStepByStepWithClaudeCodeTest.test07_MergeBilingualScript(SixMinutesStepByStepWithClaudeCodeTest.java:199)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:276)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:276)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:276)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:276)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   SixMinutesStepByStepWithClaudeCodeTest.test07_MergeBilingualScript:199 合并后的中英双语对话脚本.txt 内容为空白 ==> expected: <false> but was: <true>
+[INFO] 
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  18.043 s
+[INFO] Finished at: 2026-03-06T08:14:17+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project video-easy-creator: There are test failures.
+[ERROR] 
+[ERROR] See D:\04_GitHub\video-easy-creator\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

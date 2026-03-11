@@ -31,9 +31,15 @@ public class ConfigUtil {
     private static final String KEY_MINIMAX_API_VERSION = "minimax.api_version";
     private static final String KEY_MINIMAX_TIMEOUT = "minimax.timeout";
 
-    // Claude 模型配置键
+    // Claude / MiniMax 模型配置键
     private static final String KEY_CLAUDE_MODEL = "claude.model";
     private static final String KEY_CLAUDE_MAX_TOKENS = "claude.max_tokens";
+
+    // 模型层级配置键（新格式）
+    private static final String KEY_MINIMAX_DEFAULT_MODEL   = "api.minimax.default.model";
+    private static final String KEY_MINIMAX_HIGHSPEED_MODEL = "api.minimax.highspeed.model";
+    private static final String KEY_MINIMAX_FALLBACK_MODEL  = "api.minimax.fallback.model";
+    private static final String KEY_MINIMAX_MAX_TOKENS      = "api.minimax.max.tokens";
 
     // 环境变量键
     private static final String ENV_MINIMAX_BASE_URL = "MINIMAX_BASE_URL";
@@ -169,29 +175,50 @@ public class ConfigUtil {
     }
 
     /**
-     * 获取模型名称
+     * 获取主力模型名称（最新最强，优先使用）
      */
     public static String getClaudeModel() {
-        // 优先从配置文件读取（新格式）
+        // 优先从配置文件读取（旧格式 claude.model）
         String model = props.getProperty(KEY_CLAUDE_MODEL);
         if (StrUtil.isNotBlank(model)) {
             return model;
         }
-
-        // 兼容旧格式: api.minimax.default.model
-        model = props.getProperty("api.minimax.default.model");
+        // 新格式: api.minimax.default.model
+        model = props.getProperty(KEY_MINIMAX_DEFAULT_MODEL);
         if (StrUtil.isNotBlank(model)) {
             return model;
         }
+        return "MiniMax-M2.5"; // 默认主力模型
+    }
 
-        return "MiniMax-M2.1"; // 默认模型
+    /**
+     * 获取高速模型名称（100 token/s，适合延迟敏感场景）
+     */
+    public static String getHighspeedModel() {
+        String model = props.getProperty(KEY_MINIMAX_HIGHSPEED_MODEL);
+        if (StrUtil.isNotBlank(model)) {
+            return model;
+        }
+        return "MiniMax-M2.1"; // highspeed 变体需要更高套餐，默认降级到 M2.1
+    }
+
+    /**
+     * 获取降级模型名称（主力模型连续失败后切换）
+     */
+    public static String getFallbackModel() {
+        String model = props.getProperty(KEY_MINIMAX_FALLBACK_MODEL);
+        if (StrUtil.isNotBlank(model)) {
+            return model;
+        }
+        return "MiniMax-M2.1"; // 默认降级模型
     }
 
     /**
      * 获取最大 Token 数
      */
     public static int getClaudeMaxTokens() {
-        String maxTokens = props.getProperty(KEY_CLAUDE_MAX_TOKENS);
+        // 新格式: api.minimax.max.tokens
+        String maxTokens = props.getProperty(KEY_MINIMAX_MAX_TOKENS);
         if (StrUtil.isNotBlank(maxTokens)) {
             try {
                 return Integer.parseInt(maxTokens);
@@ -199,7 +226,16 @@ public class ConfigUtil {
                 log.warn("无效的 max_tokens 配置: {}，使用默认值", maxTokens);
             }
         }
-        return 4096; // 默认 4096
+        // 旧格式: claude.max_tokens
+        maxTokens = props.getProperty(KEY_CLAUDE_MAX_TOKENS);
+        if (StrUtil.isNotBlank(maxTokens)) {
+            try {
+                return Integer.parseInt(maxTokens);
+            } catch (NumberFormatException e) {
+                log.warn("无效的 max_tokens 配置: {}，使用默认值", maxTokens);
+            }
+        }
+        return 8192; // 默认 8192（M2.5 最大支持）
     }
 
     /**

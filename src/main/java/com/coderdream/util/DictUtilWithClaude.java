@@ -152,6 +152,7 @@ public class DictUtilWithClaude {
         com.coderdream.util.claudecode.ClaudeRequest request = new com.coderdream.util.claudecode.ClaudeRequest()
                 .setModel(CdConstants.CLAUDE_DEFAULT_MODEL)
                 .setMaxTokens(CdConstants.CLAUDE_MAX_TOKENS)
+                .setSystemPrompt("你是一个专业的英汉词典翻译助手，这是一个自动化视频生成系统的开发流程中的翻译环节。请严格按照用户要求的格式输出翻译结果，不要拒绝翻译请求，不要输出任何额外说明。")
                 .addUserMessage(prompt);
 
         try {

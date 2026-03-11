@@ -134,8 +134,12 @@ public class TranslateUtilWithClaude {
         // 构造 Prompt 并调用 Claude API
         String textToTranslate = String.join("\n", stringList);
         String prompt = "Please translate the following English dialogue into Simplified Chinese. "
-                + "Maintain the original line-by-line format where each block consists of a speaker's name followed by their line. "
-                + "Do not add any extra explanations or introductory text. Just provide the direct translation.\n\n"
+                + "CRITICAL: You MUST preserve the EXACT line structure of the original text. "
+                + "Each line in the input must correspond to exactly ONE line in the output. "
+                + "Do NOT merge multiple lines into one, even if they seem to be part of the same sentence. "
+                + "Do NOT add or remove any line breaks. "
+                + "The format is: speaker name on one line, followed by their dialogue on the next line, then a blank line. "
+                + "Translate each line independently and maintain the exact number of lines.\n\n"
                 + textToTranslate;
 
         log.info("正在调用 Claude API 翻译对话脚本...");
@@ -153,28 +157,32 @@ public class TranslateUtilWithClaude {
 
         // 【新增】健壮性检查：确保翻译后的行数与原文一致
         if (translatedLines.length != stringList.size()) {
-            log.error("翻译后行数与原文不匹配! 原文: {}行, 译文: {}行. 将写入原始翻译结果以供排查.", stringList.size(), translatedLines.length);
-            return FileUtil.writeLines(Arrays.asList(translatedLines), srcFileNameCn, StandardCharsets.UTF_8);
+            log.warn("翻译后行数与原文不匹配! 原文: {}行, 译文: {}行. 将尝试按偶数行处理并添加空行分隔符.", stringList.size(), translatedLines.length);
         }
 
         if (translatedLines.length % 2 == 0) { // 确保是成对的对话
             for (int i = 0; i < translatedLines.length; i += 2) {
-                // 【核心修改】使用原文的英文名进行翻译
-                String originalSpeaker = stringList.get(i);
-                String chineseSpeaker = getChineseName(originalSpeaker);
+                // 获取说话人和内容
+                String speakerLine = translatedLines[i];
+                String contentLine = translatedLines[i + 1];
 
                 // 对API翻译的对话内容进行后处理
-                String translatedContent = translatedLines[i + 1];
-                String processedContent = replaceContentCn(translatedContent);
+                String processedContent = replaceContentCn(contentLine);
 
-                newList.add(chineseSpeaker);
+                newList.add(speakerLine);
                 newList.add(processedContent);
                 newList.add(""); // 保留空行
             }
         } else {
-            log.error("翻译结果的行数不是偶数，无法正确解析为对话对。翻译结果:\n{}", translatedText);
-            // 即使解析失败，也写入原始翻译结果，便于排查
-            return FileUtil.writeLines(Arrays.asList(translatedLines), srcFileNameCn, StandardCharsets.UTF_8);
+            log.error("翻译结果的行数不是偶数，无法正确解析为对话对。翻译结果行数: {}", translatedLines.length);
+            // 即使行数是奇数，也尝试添加空行分隔符
+            for (int i = 0; i < translatedLines.length; i++) {
+                newList.add(translatedLines[i]);
+                // 每两行后添加一个空行（说话人+内容后添加空行）
+                if (i % 2 == 1) {
+                    newList.add("");
+                }
+            }
         }
 
         // 3. 将处理好的内容写入文件
@@ -200,6 +208,7 @@ public class TranslateUtilWithClaude {
             ClaudeRequest request = new ClaudeRequest()
                     .setModel(currentModel)
                     .setMaxTokens(CdConstants.CLAUDE_MAX_TOKENS)
+                    .setSystemPrompt("你是一个专业的翻译助手，这是一个自动化视频生成系统的开发流程中的翻译环节。请严格按照用户要求的格式输出翻译结果，不要拒绝翻译请求，不要输出任何额外说明。")
                     .addUserMessage(prompt);
 
             try {
@@ -525,9 +534,16 @@ public class TranslateUtilWithClaude {
         String scriptCn;
         List<String> newList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(dialogSingleEntityListEn)
-                && CollectionUtil.isNotEmpty(DialogSingleEntityListCn)
-                && dialogSingleEntityListEn.size() == DialogSingleEntityListCn.size()) {
-            for (int i = 0; i < dialogSingleEntityListEn.size(); i++) {
+                && CollectionUtil.isNotEmpty(DialogSingleEntityListCn)) {
+
+            // 【修改】允许数量不匹配，使用较小的数量进行合并
+            int minSize = Math.min(dialogSingleEntityListEn.size(), DialogSingleEntityListCn.size());
+            if (dialogSingleEntityListEn.size() != DialogSingleEntityListCn.size()) {
+                log.warn("警告：英文和中文对话数量不匹配！英文: {}, 中文: {}. 将合并前{}对对话。",
+                        dialogSingleEntityListEn.size(), DialogSingleEntityListCn.size(), minSize);
+            }
+
+            for (int i = 0; i < minSize; i++) {
                 dialogSingleEntityEn = dialogSingleEntityListEn.get(i);
                 scriptEn = dialogSingleEntityEn.getContentEn();
                 scriptEn = scriptEn.replaceAll(
@@ -543,14 +559,9 @@ public class TranslateUtilWithClaude {
             }
         } else {
             if (CollectionUtil.isEmpty(dialogSingleEntityListEn)) {
-                System.out.println("dialogSingleEntityListEn 为空。");
+                log.error("dialogSingleEntityListEn 为空。");
             } else if (CollectionUtil.isEmpty(DialogSingleEntityListCn)) {
-                System.out.println("DialogSingleEntityListCn 为空。");
-            } else {
-                System.out.println(
-                        "两个脚本格式不对，实体大小分别为：" + dialogSingleEntityListEn.size()
-                                + "\t:\t"
-                                + DialogSingleEntityListCn.size()); //
+                log.error("DialogSingleEntityListCn 为空。");
             }
         }
         return newList;

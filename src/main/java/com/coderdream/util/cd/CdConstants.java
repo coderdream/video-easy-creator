@@ -377,6 +377,31 @@ public class CdConstants {
   public static final int CLAUDE_RETRY_DELAY = 2000;
 
   /**
+   * MiniMax API 基础 URL
+   */
+  public static final String MINIMAX_BASE_URL = "https://api.minimax.chat";
+
+  /**
+   * MiniMax API 调用超时时间（毫秒）
+   */
+  public static final int MINIMAX_API_TIMEOUT = 120000;
+
+  /**
+   * MiniMax API 最大重试次数
+   */
+  public static final int MINIMAX_MAX_RETRIES = 3;
+
+  /**
+   * MiniMax API 重试延迟（毫秒）
+   */
+  public static final int MINIMAX_RETRY_DELAY = 2000;
+
+  /**
+   * MiniMax 默认模型
+   */
+  public static final String MINIMAX_DEFAULT_MODEL = "abab6.5s-chat";
+
+  /**
    * Claude 工具调用循环最大迭代次数
    */
   public static final int CLAUDE_TOOL_LOOP_MAX_ITERATIONS = 10;
