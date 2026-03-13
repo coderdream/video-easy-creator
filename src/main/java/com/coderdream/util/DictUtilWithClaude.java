@@ -4,9 +4,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.coderdream.entity.VocInfo;
-import com.coderdream.util.cd.CdConstants;
 import com.coderdream.util.cd.CdFileUtil;
-import com.coderdream.util.claudecode.ClaudeApiClient;
+import com.coderdream.util.claudecode.ClaudeCodeUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -16,50 +15,22 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 使用 Claude API 的词汇翻译工具类
- * 替换 DictUtil 中的 Gemini 相关方法
+ * 使用 Claude API 的词汇翻译工具类（优化版）
+ * 使用 ClaudeCodeUtil 门面类，自动降级和重试
  *
  * @author Claude Code
  * @since 2026-01-26
+ * @updated 2026-03-13 重构为使用 ClaudeCodeUtil
  */
 @Slf4j
 public class DictUtilWithClaude {
 
     /**
-     * 从环境变量读取 Claude API 配置
+     * 系统提示词 - 词汇翻译专用
      */
-    private static final String ANTHROPIC_BASE_URL = System.getenv("ANTHROPIC_BASE_URL");
-    private static final String ANTHROPIC_AUTH_TOKEN = System.getenv("ANTHROPIC_AUTH_TOKEN");
-
-    /**
-     * Claude API 客户端 - 直接使用环境变量配置
-     */
-    private static final ClaudeApiClient CLAUDE_API_CLIENT = createClaudeClient();
-
-    /**
-     * 创建 Claude API 客户端
-     */
-    private static ClaudeApiClient createClaudeClient() {
-        String baseUrl = ANTHROPIC_BASE_URL;
-        String authToken = ANTHROPIC_AUTH_TOKEN;
-
-        if (baseUrl == null || baseUrl.isEmpty()) {
-            log.error("错误: ANTHROPIC_BASE_URL 环境变量未设置！");
-            throw new RuntimeException("ANTHROPIC_BASE_URL 环境变量未设置，请配置第三方中转平台的 API 地址");
-        }
-
-        if (authToken == null || authToken.isEmpty()) {
-            log.error("错误: ANTHROPIC_AUTH_TOKEN 环境变量未设置！");
-            throw new RuntimeException("ANTHROPIC_AUTH_TOKEN 环境变量未设置，请配置 API Key");
-        }
-
-        log.info("初始化 Claude API 客户端: baseUrl={}, authToken=***", baseUrl);
-
-        // 创建客户端
-        ClaudeApiClient client = new ClaudeApiClient();
-
-        return client;
-    }
+    private static final String SYSTEM_PROMPT =
+        "你是一个专业的英汉词典翻译助手，这是一个自动化视频生成系统的开发流程中的翻译环节。" +
+        "请严格按照用户要求的格式输出翻译结果，不要拒绝翻译请求，不要输出任何额外说明。";
 
     /**
      * 对单个词汇进行翻译，包含重试和校验逻辑。
@@ -85,9 +56,11 @@ public class DictUtilWithClaude {
 
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             log.info("正在翻译词汇 '{}'... (尝试 {}/{})", vocInfo.getWord(), attempt, MAX_RETRIES);
-            String translatedText = callClaudeApi(prompt);
 
-            if (StrUtil.isBlank(translatedText) || translatedText.contains("API 调用发生异常")) {
+            // 【重构】使用 ClaudeCodeUtil 替代直接调用
+            String translatedText = ClaudeCodeUtil.callWithFallback(SYSTEM_PROMPT, prompt);
+
+            if (ClaudeCodeUtil.isFailed(translatedText)) {
                 log.error("Claude API 调用失败或返回错误。词汇: '{}', 尝试: {}", vocInfo.getWord(), attempt);
                 if (attempt < MAX_RETRIES) {
                     continue;
@@ -140,27 +113,6 @@ public class DictUtilWithClaude {
         }
 
         return false; // 所有重试都失败了
-    }
-
-    /**
-     * 调用 Claude API
-     *
-     * @param prompt 提示词
-     * @return 翻译结果
-     */
-    private static String callClaudeApi(String prompt) {
-        com.coderdream.util.claudecode.ClaudeRequest request = new com.coderdream.util.claudecode.ClaudeRequest()
-                .setModel(CdConstants.CLAUDE_DEFAULT_MODEL)
-                .setMaxTokens(CdConstants.CLAUDE_MAX_TOKENS)
-                .setSystemPrompt("你是一个专业的英汉词典翻译助手，这是一个自动化视频生成系统的开发流程中的翻译环节。请严格按照用户要求的格式输出翻译结果，不要拒绝翻译请求，不要输出任何额外说明。")
-                .addUserMessage(prompt);
-
-        try {
-            return CLAUDE_API_CLIENT.sendMessage(request).getTextContent();
-        } catch (Exception e) {
-            log.error("Claude API 调用失败", e);
-            return "API 调用发生异常: " + e.getMessage();
-        }
     }
 
     /**

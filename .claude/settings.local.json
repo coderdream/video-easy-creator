@@ -12,7 +12,8 @@
       "Bash(test:*)",
       "Bash(where:*)",
       "Bash(\"C:\\\\Program Files\\\\Python39\\\\python.exe\" -m pip list)",
-      "Bash(\"C:\\\\Program Files\\\\Python39\\\\python.exe\" --version)"
+      "Bash(\"C:\\\\Program Files\\\\Python39\\\\python.exe\" --version)",
+      "Bash(mvn test:*)"
     ]
   }
 }

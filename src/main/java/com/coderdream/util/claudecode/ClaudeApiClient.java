@@ -232,17 +232,6 @@ public class ClaudeApiClient {
             throw new RuntimeException("API 响应为空");
         }
 
-        // 检查是否包含错误关键词
-        if (responseStr.contains("Too Many Requests") ||
-            responseStr.contains("429") ||
-            responseStr.contains("Bad Request") ||
-            responseStr.contains("400") ||
-            responseStr.contains("API 错误") ||
-            responseStr.contains("error")) {
-            log.warn("API 返回错误信息: {}", responseStr.substring(0, Math.min(200, responseStr.length())));
-            throw new RuntimeException("API Error: " + responseStr);
-        }
-
         // 尝试检查响应是否以 { 开头（应该是JSON）
         if (!responseStr.trim().startsWith("{")) {
             log.error("API 响应不是有效的JSON格式: {}", responseStr.substring(0, Math.min(200, responseStr.length())));
@@ -257,11 +246,19 @@ public class ClaudeApiClient {
             throw new RuntimeException("JSON解析失败: " + e.getMessage() + ", 响应: " + responseStr);
         }
 
-        // 检查错误
+        // 【修复】只检查 JSON 根级别的 error 字段，而不是检查整个字符串
         if (json.containsKey("error")) {
-            String errorMsg = json.getByPath("error.message").toString();
-            log.error("API 错误: {}", errorMsg);
+            JSONObject errorObj = json.getJSONObject("error");
+            String errorMsg = errorObj != null ? errorObj.getStr("message") : "Unknown error";
+            String errorType = errorObj != null ? errorObj.getStr("type") : "unknown";
+            log.error("API 错误: type={}, message={}", errorType, errorMsg);
             throw new RuntimeException("API Error: " + errorMsg);
+        }
+
+        // 检查是否是成功的响应（应该包含 content 字段）
+        if (!json.containsKey("content")) {
+            log.error("API 响应缺少 content 字段: {}", responseStr.substring(0, Math.min(200, responseStr.length())));
+            throw new RuntimeException("Invalid response: missing content field");
         }
 
         ClaudeResponse response = new ClaudeResponse();

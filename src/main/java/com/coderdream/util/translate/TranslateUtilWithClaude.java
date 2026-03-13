@@ -13,10 +13,7 @@ import com.coderdream.util.cd.CdConstants;
 import com.coderdream.util.cd.CdFileUtil;
 import com.coderdream.util.cd.CdTimeUtil;
 import com.coderdream.util.cd.ChineseCharacterUtil;
-import com.coderdream.util.claudecode.ClaudeApiClient;
-import com.coderdream.util.claudecode.ClaudeMessage;
-import com.coderdream.util.claudecode.ClaudeRequest;
-import com.coderdream.util.claudecode.prompt.ClaudeTranslator;
+import com.coderdream.util.claudecode.ClaudeCodeUtil;
 import com.coderdream.util.ollama.OllamaTranslateUtil;
 import com.coderdream.util.proxy.OperatingSystem;
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
@@ -31,55 +28,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 使用 Claude API 的翻译工具类
- * 替换 TranslateUtil 中的 Gemini 调用
+ * 使用 Claude API 的翻译工具类（优化版）
+ * 使用 ClaudeCodeUtil 门面类，自动降级和重试
  *
  * @author Claude Code
  * @since 2026-01-26
+ * @updated 2026-03-13 重构为使用 ClaudeCodeUtil
  */
 @Slf4j
 public class TranslateUtilWithClaude {
 
     /**
-     * 从环境变量读取 Claude API 配置
+     * 系统提示词 - 翻译专用
      */
-    private static final String ANTHROPIC_BASE_URL = System.getenv("ANTHROPIC_BASE_URL");
-    private static final String ANTHROPIC_AUTH_TOKEN = System.getenv("ANTHROPIC_AUTH_TOKEN");
-
-    /**
-     * Claude API 客户端 - 直接使用环境变量配置
-     */
-    private static final ClaudeApiClient CLAUDE_API_CLIENT = createClaudeClient();
-
-    /**
-     * Claude 翻译器
-     */
-    private static final ClaudeTranslator CLAUDE_TRANSLATOR = new ClaudeTranslator(CLAUDE_API_CLIENT);
-
-    /**
-     * 创建 Claude API 客户端
-     */
-    private static ClaudeApiClient createClaudeClient() {
-        String baseUrl = ANTHROPIC_BASE_URL;
-        String authToken = ANTHROPIC_AUTH_TOKEN;
-
-        if (baseUrl == null || baseUrl.isEmpty()) {
-            log.error("错误: ANTHROPIC_BASE_URL 环境变量未设置！");
-            throw new RuntimeException("ANTHROPIC_BASE_URL 环境变量未设置，请配置第三方中转平台的 API 地址");
-        }
-
-        if (authToken == null || authToken.isEmpty()) {
-            log.error("错误: ANTHROPIC_AUTH_TOKEN 环境变量未设置！");
-            throw new RuntimeException("ANTHROPIC_AUTH_TOKEN 环境变量未设置，请配置 API Key");
-        }
-
-        log.info("初始化 Claude API 客户端: baseUrl={}, authToken=***", baseUrl);
-
-        // 创建客户端（代理已在 ClaudeApiClient 中禁用）
-        ClaudeApiClient client = new ClaudeApiClient();
-
-        return client;
-    }
+    private static final String SYSTEM_PROMPT =
+        "你是一个专业的翻译助手，这是一个自动化视频生成系统的开发流程中的翻译环节。" +
+        "请严格按照用户要求的格式输出翻译结果，不要拒绝翻译请求，不要输出任何额外说明。";
 
     public static void main(String[] args) {
         String folderName = "240104"; // 用于测试的文件夹
@@ -143,9 +107,10 @@ public class TranslateUtilWithClaude {
                 + textToTranslate;
 
         log.info("正在调用 Claude API 翻译对话脚本...");
-        String translatedText = callClaudeApi(prompt);
+        // 【重构】使用 ClaudeCodeUtil 替代 callClaudeApi
+        String translatedText = ClaudeCodeUtil.callWithFallback(SYSTEM_PROMPT, prompt);
 
-        if (StrUtil.isBlank(translatedText) || translatedText.contains("API 调用发生异常")) {
+        if (ClaudeCodeUtil.isFailed(translatedText)) {
             log.error("Claude API 翻译失败，返回内容为空或包含错误信息。");
             return FileUtil.touch(srcFileNameCn);
         }
@@ -187,68 +152,6 @@ public class TranslateUtilWithClaude {
 
         // 3. 将处理好的内容写入文件
         return FileUtil.writeLines(newList, srcFileNameCn, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * 调用 Claude API
-     *
-     * @param prompt 提示词
-     * @return 翻译结果
-     */
-    private static String callClaudeApi(String prompt) {
-        // 主模型和备用模型配置
-        final String PRIMARY_MODEL = "claude-sonnet-4-5-20250929";
-        final String BACKUP_MODEL = "claude-haiku-4-5-20251001";
-        final int MODEL_SWITCH_THRESHOLD = 3; // 主模型失败3次后切换
-
-        String currentModel = PRIMARY_MODEL;
-        int errorCount = 0;
-
-        while (true) {
-            ClaudeRequest request = new ClaudeRequest()
-                    .setModel(currentModel)
-                    .setMaxTokens(CdConstants.CLAUDE_MAX_TOKENS)
-                    .setSystemPrompt("你是一个专业的翻译助手，这是一个自动化视频生成系统的开发流程中的翻译环节。请严格按照用户要求的格式输出翻译结果，不要拒绝翻译请求，不要输出任何额外说明。")
-                    .addUserMessage(prompt);
-
-            try {
-                String result = CLAUDE_API_CLIENT.sendMessage(request).getTextContent();
-                // 如果使用了备用模型且成功了，下次恢复使用主模型
-                if (PRIMARY_MODEL.equals(currentModel)) {
-                    return result;
-                } else {
-                    log.info("备用模型 {} 调用成功，下次将尝试恢复主模型", currentModel);
-                    return result;
-                }
-            } catch (Exception e) {
-                errorCount++;
-                log.warn("模型 {} 调用失败 (第{}次): {}", currentModel, errorCount, e.getMessage());
-
-                // 检查是否需要切换模型
-                if (errorCount >= MODEL_SWITCH_THRESHOLD && PRIMARY_MODEL.equals(currentModel)) {
-                    log.warn("主模型 {} 失败超过{}次，切换到备用模型 {}", PRIMARY_MODEL, MODEL_SWITCH_THRESHOLD, BACKUP_MODEL);
-                    currentModel = BACKUP_MODEL;
-                    errorCount = 0; // 重置错误计数
-                } else if (BACKUP_MODEL.equals(currentModel)) {
-                    // 备用模型也失败了，继续使用备用模型重试
-                    log.warn("备用模型 {} 也失败，继续重试", BACKUP_MODEL);
-                }
-
-                // 如果是最后一次尝试，返回错误信息
-                if (errorCount >= MODEL_SWITCH_THRESHOLD && BACKUP_MODEL.equals(currentModel)) {
-                    log.error("备用模型 {} 调用失败", currentModel);
-                    return "API 调用发生异常: " + e.getMessage();
-                }
-
-                // 等待后重试
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    return "API 调用被中断";
-                }
-            }
-        }
     }
 
     /**
@@ -364,12 +267,13 @@ public class TranslateUtilWithClaude {
                         + textToTranslate;
 
                 log.info("正在调用 Claude API 翻译SRT字幕... (块 {}/{}, 尝试 {}/{})", i + 1, chunks.size(), retry + 1, MAX_API_RETRIES);
-                String translatedText = callClaudeApi(prompt);
+                // 【重构】使用 ClaudeCodeUtil 替代 callClaudeApi
+                String translatedText = ClaudeCodeUtil.callWithFallback(SYSTEM_PROMPT, prompt);
 
                 // 检测是否是429错误
                 boolean is429Error = StrUtil.isNotBlank(translatedText) && translatedText.contains("Too Many Requests");
 
-                if (StrUtil.isBlank(translatedText) || translatedText.contains("API 调用发生异常") || is429Error) {
+                if (ClaudeCodeUtil.isFailed(translatedText) || is429Error) {
                     if (is429Error) {
                         log.warn("检测到 429 错误（速率限制），{}秒后重试...", RETRY_INTERVAL_429_MS / 1000);
                         ThreadUtil.sleep(RETRY_INTERVAL_429_MS);
@@ -584,9 +488,10 @@ public class TranslateUtilWithClaude {
                 + textToDescribe;
 
         log.info("正在调用 Claude API 生成平台描述文件...");
-        String description = callClaudeApi(prompt);
+        // 【重构】使用 ClaudeCodeUtil 替代 callClaudeApi
+        String description = ClaudeCodeUtil.callWithFallback(SYSTEM_PROMPT, prompt);
 
-        if (StrUtil.isBlank(description) || description.contains("API 调用发生异常")) {
+        if (ClaudeCodeUtil.isFailed(description)) {
             log.error("Claude API 生成描述失败");
             return FileUtil.touch(descriptionFileName);
         }
@@ -602,13 +507,7 @@ public class TranslateUtilWithClaude {
      */
     public static String generateContent(String prompt) {
         log.info("正在调用 Claude API 生成内容...");
-        String result = callClaudeApi(prompt);
-
-        if (StrUtil.isBlank(result) || result.contains("API 调用发生异常")) {
-            log.error("Claude API 生成内容失败");
-            return "API 调用发生异常";
-        }
-
-        return result;
+        // 【重构】使用 ClaudeCodeUtil 替代 callClaudeApi
+        return ClaudeCodeUtil.callWithFallback(SYSTEM_PROMPT, prompt);
     }
 }

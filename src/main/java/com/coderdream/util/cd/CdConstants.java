@@ -312,24 +312,40 @@ public class CdConstants {
   // ==================== Claude API 配置 ====================
 
   /**
-   * Claude Opus 4.5 模型（最强编码能力）
+   * Claude Opus 4.6 模型（最强能力，2026年2月发布）
    */
-  public static final String CLAUDE_MODEL_OPUS_45 = "claude-opus-4-5-20251101";
+  public static final String CLAUDE_MODEL_OPUS_46 = "claude-opus-4-6";
 
   /**
-   * Claude Sonnet 4.5 模型（平衡性能和成本）
+   * Claude Sonnet 4.6 模型（最新版本，改进的编码能力）
    */
-  public static final String CLAUDE_MODEL_SONNET_45 = "claude-sonnet-4-5-20250929";
+  public static final String CLAUDE_MODEL_SONNET_46 = "claude-sonnet-4-6";
 
   /**
    * Claude Haiku 4.5 模型（轻量级，快速响应）
    */
   public static final String CLAUDE_MODEL_HAIKU_45 = "claude-haiku-4-5-20251001";
 
+  // ==================== Claude 4.5 系列（旧版本，保留兼容性） ====================
+
   /**
-   * 默认使用的 Claude 模型
+   * Claude Opus 4.5 模型（最强编码能力）
+   * @deprecated 建议使用 {@link #CLAUDE_MODEL_OPUS_46}
    */
-  public static final String CLAUDE_DEFAULT_MODEL = CLAUDE_MODEL_SONNET_45;
+  @Deprecated
+  public static final String CLAUDE_MODEL_OPUS_45 = "claude-opus-4-5-20251101";
+
+  /**
+   * Claude Sonnet 4.5 模型（平衡性能和成本）
+   * @deprecated 建议使用 {@link #CLAUDE_MODEL_SONNET_46}
+   */
+  @Deprecated
+  public static final String CLAUDE_MODEL_SONNET_45 = "claude-sonnet-4-5-20250929";
+
+  /**
+   * 默认使用的 Claude 模型（使用最新的 Sonnet 4.6）
+   */
+  public static final String CLAUDE_DEFAULT_MODEL = CLAUDE_MODEL_SONNET_46;
 
   /**
    * Claude API 最大输出 Token 数
